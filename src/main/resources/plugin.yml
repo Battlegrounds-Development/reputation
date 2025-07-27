@@ -1,0 +1,10 @@
+name: Reputation
+version: '${project.version}'
+main: me.remag501.reputation.Reputation
+api-version: '1.19'
+
+commands:
+  reputation:
+    description: Manage player reputation
+    usage: /<command> <add|remove|set|view>
+    permission: reputation.use

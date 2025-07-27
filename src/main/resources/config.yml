@@ -1,0 +1,9 @@
+permissions:
+  amy:
+    - permission: trader.buy.sword
+      min: 10
+    - permission: trader.sell.armor
+      min: 20
+  brick:
+    - permission: trader.buy.potion
+      min: 5
