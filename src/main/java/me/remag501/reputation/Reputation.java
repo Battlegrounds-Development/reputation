@@ -2,6 +2,7 @@ package me.remag501.reputation;
 
 import me.remag501.reputation.commands.ReputationCommand;
 import me.remag501.reputation.core.ReputationCore;
+import me.remag501.reputation.util.DealerUtil;
 import me.remag501.reputation.util.PermissionUtil;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,6 +16,7 @@ public final class Reputation extends JavaPlugin {
     private ReputationCore reputationCore;
     private File reputationFile;
     private FileConfiguration reputationConfig;
+    private DealerUtil dealerUtil;
 
     @Override
     public void onEnable() {
@@ -25,7 +27,8 @@ public final class Reputation extends JavaPlugin {
         createReputationFile();
 
         // Example: load NPC list and permission util
-        List<String> npcList = List.of("amy", "brick", "jake");
+        dealerUtil = new DealerUtil(getConfig());
+        List<String> npcList = dealerUtil.getDealers();
 
         PermissionUtil permissionUtil = new PermissionUtil();
         permissionUtil.loadFromConfig(getConfig()); // loads from config.yml
