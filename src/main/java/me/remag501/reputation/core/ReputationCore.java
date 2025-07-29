@@ -28,7 +28,7 @@ public class ReputationCore {
         this.permissionUtil = permissionUtil;
 
         // Read from main config (not reputation.yml)
-        FileConfiguration mainConfig = Bukkit.getPluginManager().getPlugin("Reputation").getConfig();
+        FileConfiguration mainConfig = Bukkit.getPluginManager().getPlugin("ReputationBGS").getConfig();
         this.buyRate = mainConfig.getDouble("conversion.buy-rate", 0.5);
         this.sellRate = mainConfig.getDouble("conversion.sell-rate", 0.2);
 

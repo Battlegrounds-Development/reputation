@@ -2,6 +2,7 @@ package me.remag501.reputation.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.HashMap;
 import java.util.List;
@@ -95,6 +96,7 @@ public class PermissionUtil {
 
     public void applyPermissions(Player player, String dealer, int playerRep) {
         Map<String, Integer> perms = dealerPermissions.get(dealer.toLowerCase());
+        player.sendMessage(dealerPermissions.toString());
         if (perms == null) return;
         for (Map.Entry<String, Integer> entry : perms.entrySet()) {
             String permission = entry.getKey();
@@ -102,10 +104,13 @@ public class PermissionUtil {
 
             if (playerRep >= requiredRep) {
                 // Grant
-                player.addAttachment(Bukkit.getPluginManager().getPlugin("Reputation"), permission, true);
+                player.sendMessage("You gained permission " + permission);
+                PermissionAttachment permissionAttachment = player.addAttachment(Bukkit.getPluginManager().getPlugin("ReputationBGS"));
+                permissionAttachment.setPermission(permission, true);
             } else {
                 // Revoke
-                player.addAttachment(Bukkit.getPluginManager().getPlugin("Reputation"), permission, false);
+                player.sendMessage("You lost permission " + permission);
+                player.addAttachment(Bukkit.getPluginManager().getPlugin("ReputationBGS"), permission, false);
             }
         }
     }

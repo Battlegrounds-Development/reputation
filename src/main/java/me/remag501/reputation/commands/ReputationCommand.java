@@ -1,5 +1,6 @@
 package me.remag501.reputation.commands;
 
+import me.remag501.reputation.Reputation;
 import me.remag501.reputation.core.ReputationCore;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -10,9 +11,11 @@ import org.bukkit.entity.Player;
 public class ReputationCommand implements CommandExecutor {
 
     private final ReputationCore reputationCore;
+    private final Reputation plugin;
 
-    public ReputationCommand(ReputationCore reputationCore) {
-        this.reputationCore = reputationCore;
+    public ReputationCommand(Reputation plugin) {
+        this.plugin = plugin;
+        this.reputationCore = plugin.getReputationCore();
     }
 
     @Override
@@ -29,6 +32,7 @@ public class ReputationCommand implements CommandExecutor {
             case "remove":     return handleRemove(sender, args);
             case "set":        return handleSet(sender, args);
             case "view":       return handleView(sender, args);
+            case "reload":     return handleReload(sender, args);
             case "tradebuy":   return handleTradeBuy(sender, args);
             case "tradesell":  return handleTradeSell(sender, args);
             default:
@@ -39,6 +43,12 @@ public class ReputationCommand implements CommandExecutor {
 
 
     // ---------------- Subcommand Handlers ----------------
+
+    private boolean handleReload(CommandSender sender, String[] args) {
+        plugin.reload();
+        sender.sendMessage("Config has been reloaded");
+        return true;
+    }
 
     private boolean handleAdd(CommandSender sender, String[] args) {
         // /reputation add <player> <npc> <amount>

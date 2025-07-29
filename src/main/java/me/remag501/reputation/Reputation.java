@@ -17,6 +17,7 @@ public final class Reputation extends JavaPlugin {
     private File reputationFile;
     private FileConfiguration reputationConfig;
     private DealerUtil dealerUtil;
+    private PermissionUtil permissionUtil;
 
     @Override
     public void onEnable() {
@@ -27,17 +28,22 @@ public final class Reputation extends JavaPlugin {
         createReputationFile();
 
         // Example: load NPC list and permission util
-        dealerUtil = new DealerUtil(getConfig());
+        dealerUtil = new DealerUtil(this);
         List<String> npcList = dealerUtil.getDealers();
 
-        PermissionUtil permissionUtil = new PermissionUtil();
+        permissionUtil = new PermissionUtil();
         permissionUtil.loadFromConfig(getConfig()); // loads from config.yml
 
-        ReputationCore reputationCore = new ReputationCore(reputationConfig, npcList, permissionUtil);
+        reputationCore = new ReputationCore(reputationConfig, npcList, permissionUtil);
 
         if (getCommand("reputation") != null) {
-            getCommand("reputation").setExecutor(new ReputationCommand(reputationCore));
+            getCommand("reputation").setExecutor(new ReputationCommand(this));
         }
+    }
+
+    public void reload() {
+        reloadConfig();
+        permissionUtil.loadFromConfig(getConfig());
     }
 
     private void createReputationFile() {
@@ -57,7 +63,7 @@ public final class Reputation extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        saveConfig();
+//        saveConfig();
         saveReputationFile();
     }
 
@@ -72,5 +78,9 @@ public final class Reputation extends JavaPlugin {
 
     public ReputationCore getReputationCore() {
         return reputationCore;
+    }
+
+    public PermissionUtil getPermissionUtil() {
+        return permissionUtil;
     }
 }
