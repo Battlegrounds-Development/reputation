@@ -1,7 +1,6 @@
 package me.remag501.reputation.manager;
 
 import me.remag501.reputation.Reputation;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
@@ -9,16 +8,20 @@ import org.bukkit.permissions.PermissionAttachment;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class PermissionManager {
-    private final Map<String, Map<String, Integer>> dealerPermissions = new HashMap<>();
-    private Reputation plugin;
+
+    private final Map<String, Map<String, Integer>> dealerPermissions = new HashMap<>(); // dealer -> (perm -> minRep)
+    private final Map<UUID, PermissionAttachment> attachments = new HashMap<>(); // player -> attachment
+    private final Reputation plugin;
 
     public PermissionManager(Reputation plugin) {
         this.plugin = plugin;
         loadConfig();
     }
 
+    /** Loads dealer permission thresholds from config.yml */
     public void loadConfig() {
         FileConfiguration config = plugin.getConfig();
         dealerPermissions.clear();
@@ -35,30 +38,69 @@ public class PermissionManager {
                 permMap.put(permission, min);
             }
 
-            dealerPermissions.put(dealer, permMap);
+            dealerPermissions.put(dealer.toLowerCase(), permMap);
         }
     }
 
+    /**
+     * Ensure player has an attachment in the map (creates if missing).
+     */
+    private PermissionAttachment getAttachment(Player player) {
+        return attachments.computeIfAbsent(player.getUniqueId(), uuid ->
+                player.addAttachment(plugin));
+    }
+
+    /**
+     * Apply or revoke permissions for a specific dealer based on player's reputation.
+     */
     public void applyPermissions(Player player, String dealer, int playerRep) {
-        Map<String, Integer> perms = dealerPermissions.get(dealer.toLowerCase());
-        player.sendMessage(dealerPermissions.toString());
+        dealer = dealer.toLowerCase();
+
+        Map<String, Integer> perms = dealerPermissions.get(dealer);
         if (perms == null) return;
+
+        PermissionAttachment attachment = getAttachment(player);
+
         for (Map.Entry<String, Integer> entry : perms.entrySet()) {
             String permission = entry.getKey();
             int requiredRep = entry.getValue();
 
             if (playerRep >= requiredRep) {
                 // Grant
-                player.sendMessage("You gained permission " + permission);
-                PermissionAttachment permissionAttachment = player.addAttachment(Bukkit.getPluginManager().getPlugin("ReputationBGS"));
-                permissionAttachment.setPermission(permission, true);
+                attachment.setPermission(permission, true);
             } else {
                 // Revoke
-                player.sendMessage("You lost permission " + permission);
-                player.addAttachment(Bukkit.getPluginManager().getPlugin("ReputationBGS"), permission, false);
+                attachment.unsetPermission(permission);
             }
         }
     }
 
-}
+    /**
+     * Apply all dealer permissions for player (used on join or reload).
+     */
+    public void applyAllPermissions(Player player, Map<String, Integer> playerRepMap) {
+        for (Map.Entry<String, Map<String, Integer>> dealerEntry : dealerPermissions.entrySet()) {
+            String dealer = dealerEntry.getKey();
+            int rep = playerRepMap.getOrDefault(dealer, 0);
+            applyPermissions(player, dealer, rep);
+        }
+    }
 
+    /**
+     * Cleanup attachment when player leaves.
+     */
+    public void removeAttachment(Player player) {
+        PermissionAttachment attachment = attachments.remove(player.getUniqueId());
+        if (attachment != null) {
+            attachment.remove();
+        }
+    }
+
+    /** Optional: clear everything on plugin disable */
+    public void clearAll() {
+        for (PermissionAttachment attachment : attachments.values()) {
+            attachment.remove();
+        }
+        attachments.clear();
+    }
+}

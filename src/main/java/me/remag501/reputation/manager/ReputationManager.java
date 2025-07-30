@@ -36,10 +36,16 @@ public class ReputationManager {
         loadReputation();
     }
 
+    public Map<String, Integer> getReputationMap(Player player) {
+        UUID uuid = player.getUniqueId();
+        // Return a copy to avoid accidental modifications
+        return new HashMap<>(playersReputation.getOrDefault(uuid, new HashMap<>()));
+    }
+
     private void setManagers(Reputation plugin) {
         this.reputationData = plugin.getReputationConfig();
         this.npcList = plugin.getDealerManager().getDealers();
-        this.permissionManager = plugin.getPermissionUtil();
+        this.permissionManager = plugin.getPermissionManager();
     }
 
     private void loadConfig() {

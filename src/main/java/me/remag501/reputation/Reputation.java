@@ -1,16 +1,17 @@
 package me.remag501.reputation;
 
 import me.remag501.reputation.command.ReputationCommand;
+import me.remag501.reputation.listener.PlayerListener;
 import me.remag501.reputation.manager.ReputationManager;
 import me.remag501.reputation.manager.DealerManager;
 import me.remag501.reputation.manager.PermissionManager;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public final class Reputation extends JavaPlugin {
     private ReputationManager reputationManager;
@@ -26,6 +27,9 @@ public final class Reputation extends JavaPlugin {
 
         // Setup reputation.yml
         createReputationFile();
+
+        // Register listener
+        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 
         // Example: load NPC list and permission util
         dealerManager = new DealerManager(this);
@@ -77,11 +81,11 @@ public final class Reputation extends JavaPlugin {
     }
 
 
-    public ReputationManager getReputationCore() {
+    public ReputationManager getReputationManager() {
         return reputationManager;
     }
 
-    public PermissionManager getPermissionUtil() {
+    public PermissionManager getPermissionManager() {
         return permissionManager;
     }
 

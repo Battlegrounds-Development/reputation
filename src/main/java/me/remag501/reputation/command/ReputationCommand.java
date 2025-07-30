@@ -15,7 +15,7 @@ public class ReputationCommand implements CommandExecutor {
 
     public ReputationCommand(Reputation plugin) {
         this.plugin = plugin;
-        this.reputationManager = plugin.getReputationCore();
+        this.reputationManager = plugin.getReputationManager();
     }
 
     @Override
