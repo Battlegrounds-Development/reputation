@@ -1,22 +1,32 @@
-package me.remag501.reputation.util;
+package me.remag501.reputation.manager;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import me.remag501.reputation.Reputation;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.Collections;
 import java.util.List;
 
-public class DealerUtil {
+public class DealerManager {
 
-    private final List<String> dealers;
+    private List<String> dealers;
     private FileConfiguration config;
     private Reputation plugin;
 
-    public DealerUtil(Reputation plugin) {
+    public DealerManager(Reputation plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfig();
         // Load and lowercase dealer names for consistency
+        if (config.isList("traders")) {
+            this.dealers = config.getStringList("traders").stream()
+                    .map(String::toLowerCase)
+                    .toList();
+        } else {
+            this.dealers = Collections.emptyList();
+        }
+    }
+
+    public void reload() {
+        this.config = plugin.getConfig();
         if (config.isList("traders")) {
             this.dealers = config.getStringList("traders").stream()
                     .map(String::toLowerCase)

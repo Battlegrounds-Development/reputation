@@ -1,7 +1,7 @@
-package me.remag501.reputation.commands;
+package me.remag501.reputation.command;
 
 import me.remag501.reputation.Reputation;
-import me.remag501.reputation.core.ReputationCore;
+import me.remag501.reputation.manager.ReputationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,12 +10,12 @@ import org.bukkit.entity.Player;
 
 public class ReputationCommand implements CommandExecutor {
 
-    private final ReputationCore reputationCore;
+    private final ReputationManager reputationManager;
     private final Reputation plugin;
 
     public ReputationCommand(Reputation plugin) {
         this.plugin = plugin;
-        this.reputationCore = plugin.getReputationCore();
+        this.reputationManager = plugin.getReputationCore();
     }
 
     @Override
@@ -64,14 +64,14 @@ public class ReputationCommand implements CommandExecutor {
         }
 
         String npc = args[2].toLowerCase();
-        if (!reputationCore.isValidNpc(npc)) {
-            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationCore.getNpcList()));
+        if (!reputationManager.isValidNpc(npc)) {
+            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationManager.getNpcList()));
             return true;
         }
 
         try {
             int amount = Integer.parseInt(args[3]);
-            reputationCore.addReputation(target, npc, amount);
+            reputationManager.addReputation(target, npc, amount);
             sender.sendMessage("§aAdded " + amount + " reputation with " + npc + " to " + target.getName() + ".");
         } catch (NumberFormatException e) {
             sender.sendMessage("§cAmount must be a number.");
@@ -93,14 +93,14 @@ public class ReputationCommand implements CommandExecutor {
         }
 
         String npc = args[2].toLowerCase();
-        if (!reputationCore.isValidNpc(npc)) {
-            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationCore.getNpcList()));
+        if (!reputationManager.isValidNpc(npc)) {
+            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationManager.getNpcList()));
             return true;
         }
 
         try {
             int amount = Integer.parseInt(args[3]);
-            reputationCore.removeReputation(target, npc, amount);
+            reputationManager.removeReputation(target, npc, amount);
             sender.sendMessage("§aRemoved " + amount + " reputation with " + npc + " from " + target.getName() + ".");
         } catch (NumberFormatException e) {
             sender.sendMessage("§cAmount must be a number.");
@@ -122,14 +122,14 @@ public class ReputationCommand implements CommandExecutor {
         }
 
         String npc = args[2].toLowerCase();
-        if (!reputationCore.isValidNpc(npc)) {
-            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationCore.getNpcList()));
+        if (!reputationManager.isValidNpc(npc)) {
+            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationManager.getNpcList()));
             return true;
         }
 
         try {
             int amount = Integer.parseInt(args[3]);
-            reputationCore.setReputation(target, npc, amount);
+            reputationManager.setReputation(target, npc, amount);
             sender.sendMessage("§aSet " + target.getName() + "'s reputation with " + npc + " to " + amount + ".");
         } catch (NumberFormatException e) {
             sender.sendMessage("§cAmount must be a number.");
@@ -151,12 +151,12 @@ public class ReputationCommand implements CommandExecutor {
         }
 
         String npc = args[2].toLowerCase();
-        if (!reputationCore.isValidNpc(npc)) {
-            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationCore.getNpcList()));
+        if (!reputationManager.isValidNpc(npc)) {
+            sender.sendMessage("§cInvalid NPC. Valid NPCs: " + String.join(", ", reputationManager.getNpcList()));
             return true;
         }
 
-        int rep = reputationCore.getReputation(target, npc);
+        int rep = reputationManager.getReputation(target, npc);
         sender.sendMessage("§e" + target.getName() + " has " + rep + " reputation with " + npc + ".");
         return true;
     }
@@ -175,17 +175,17 @@ public class ReputationCommand implements CommandExecutor {
         }
 
         String npc = args[2].toLowerCase();
-        if (!reputationCore.isValidNpc(npc)) {
-            sender.sendMessage("§cInvalid dealer. Valid dealers: " + String.join(", ", reputationCore.getNpcList()));
+        if (!reputationManager.isValidNpc(npc)) {
+            sender.sendMessage("§cInvalid dealer. Valid dealers: " + String.join(", ", reputationManager.getNpcList()));
             return true;
         }
 
         try {
             double currencyAmount = Double.parseDouble(args[3]);
-            double buyRate = reputationCore.getBuyRate();
+            double buyRate = reputationManager.getBuyRate();
             int repPoints = (int) Math.floor(currencyAmount * buyRate);
 
-            reputationCore.addReputation(target, npc, repPoints);
+            reputationManager.addReputation(target, npc, repPoints);
 
             sender.sendMessage("§aConverted " + currencyAmount + " currency into " + repPoints
                     + " reputation with " + npc + " for " + target.getName() + ".");
@@ -209,17 +209,17 @@ public class ReputationCommand implements CommandExecutor {
         }
 
         String npc = args[2].toLowerCase();
-        if (!reputationCore.isValidNpc(npc)) {
-            sender.sendMessage("§cInvalid dealer. Valid dealers: " + String.join(", ", reputationCore.getNpcList()));
+        if (!reputationManager.isValidNpc(npc)) {
+            sender.sendMessage("§cInvalid dealer. Valid dealers: " + String.join(", ", reputationManager.getNpcList()));
             return true;
         }
 
         try {
             double currencyAmount = Double.parseDouble(args[3]);
-            double sellRate = reputationCore.getSellRate();
+            double sellRate = reputationManager.getSellRate();
             int repPoints = (int) Math.floor(currencyAmount * sellRate);
 
-            reputationCore.addReputation(target, npc, repPoints);
+            reputationManager.addReputation(target, npc, repPoints);
 
             sender.sendMessage("§aConverted " + currencyAmount + " currency into " + repPoints
                     + " reputation with " + npc + " for " + target.getName() + ".");

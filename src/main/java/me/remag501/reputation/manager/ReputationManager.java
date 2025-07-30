@@ -1,6 +1,6 @@
-package me.remag501.reputation.core;
+package me.remag501.reputation.manager;
 
-import me.remag501.reputation.util.PermissionUtil;
+import me.remag501.reputation.Reputation;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -9,26 +9,42 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class ReputationCore {
+public class ReputationManager {
 
     private final Map<UUID, Map<String, Integer>> playersReputation = new HashMap<>();
-    private final List<String> npcList;
-    private final FileConfiguration reputationData;
-    private final PermissionUtil permissionUtil;
-    private final double buyRate;
-    private final double sellRate;
-    private final String msgGain;
-    private final String msgLoss;
-    private final Sound soundGain;
-    private final Sound soundLoss;
+    private List<String> npcList;
+    private FileConfiguration reputationData;
+    private PermissionManager permissionManager;
+    private double buyRate;
+    private double sellRate;
+    private String msgGain;
+    private String msgLoss;
+    private Sound soundGain;
+    private Sound soundLoss;
+    private Reputation plugin;
 
-    public ReputationCore(FileConfiguration reputationData, List<String> npcList, PermissionUtil permissionUtil) {
-        this.reputationData = reputationData;
-        this.npcList = npcList;
-        this.permissionUtil = permissionUtil;
+    public ReputationManager(Reputation plugin) {
+        this.plugin = plugin;
+        setManagers(plugin);
+        loadConfig();
+        loadReputation();
+    }
 
+    public void reload() {
+        setManagers(plugin);
+        loadConfig();
+        loadReputation();
+    }
+
+    private void setManagers(Reputation plugin) {
+        this.reputationData = plugin.getReputationConfig();
+        this.npcList = plugin.getDealerManager().getDealers();
+        this.permissionManager = plugin.getPermissionUtil();
+    }
+
+    private void loadConfig() {
         // Read from main config (not reputation.yml)
-        FileConfiguration mainConfig = Bukkit.getPluginManager().getPlugin("ReputationBGS").getConfig();
+        FileConfiguration mainConfig = plugin.getConfig();
         this.buyRate = mainConfig.getDouble("conversion.buy-rate", 0.5);
         this.sellRate = mainConfig.getDouble("conversion.sell-rate", 0.2);
 
@@ -38,9 +54,6 @@ public class ReputationCore {
 
         this.soundGain = Sound.valueOf(mainConfig.getString("sounds.gain", "ENTITY_PLAYER_LEVELUP"));
         this.soundLoss = Sound.valueOf(mainConfig.getString("sounds.loss", "ENTITY_VILLAGER_NO"));
-
-
-        loadReputation();
     }
 
     private void sendFeedback(Player player, int amount, String dealer, boolean isGain) {
@@ -70,7 +83,7 @@ public class ReputationCore {
         int newRep = repMap.getOrDefault(npc, 0) + amount;
         repMap.put(npc, newRep);
         saveReputation();
-        permissionUtil.applyPermissions(player, npc, newRep); // Apply permissions
+        permissionManager.applyPermissions(player, npc, newRep); // Apply permissions
         sendFeedback(player, amount, npc, true);
     }
 
@@ -80,7 +93,7 @@ public class ReputationCore {
         int newRep = Math.max(0, repMap.getOrDefault(npc, 0) - amount);
         repMap.put(npc, newRep);
         saveReputation();
-        permissionUtil.applyPermissions(player, npc, newRep); // Apply permissions
+        permissionManager.applyPermissions(player, npc, newRep); // Apply permissions
         sendFeedback(player, amount, npc, false);
     }
 
@@ -88,7 +101,7 @@ public class ReputationCore {
         if (!isValidNpc(npc)) return;
         getPlayerMap(player.getUniqueId()).put(npc, value);
         saveReputation();
-        permissionUtil.applyPermissions(player, npc, value); // Apply permissions
+        permissionManager.applyPermissions(player, npc, value); // Apply permissions
     }
 
     public int getReputation(Player player, String npc) {

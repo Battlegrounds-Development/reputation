@@ -1,9 +1,9 @@
 package me.remag501.reputation;
 
-import me.remag501.reputation.commands.ReputationCommand;
-import me.remag501.reputation.core.ReputationCore;
-import me.remag501.reputation.util.DealerUtil;
-import me.remag501.reputation.util.PermissionUtil;
+import me.remag501.reputation.command.ReputationCommand;
+import me.remag501.reputation.manager.ReputationManager;
+import me.remag501.reputation.manager.DealerManager;
+import me.remag501.reputation.manager.PermissionManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,11 +13,11 @@ import java.io.IOException;
 import java.util.List;
 
 public final class Reputation extends JavaPlugin {
-    private ReputationCore reputationCore;
+    private ReputationManager reputationManager;
     private File reputationFile;
     private FileConfiguration reputationConfig;
-    private DealerUtil dealerUtil;
-    private PermissionUtil permissionUtil;
+    private DealerManager dealerManager;
+    private PermissionManager permissionManager;
 
     @Override
     public void onEnable() {
@@ -28,13 +28,9 @@ public final class Reputation extends JavaPlugin {
         createReputationFile();
 
         // Example: load NPC list and permission util
-        dealerUtil = new DealerUtil(this);
-        List<String> npcList = dealerUtil.getDealers();
-
-        permissionUtil = new PermissionUtil();
-        permissionUtil.loadFromConfig(getConfig()); // loads from config.yml
-
-        reputationCore = new ReputationCore(reputationConfig, npcList, permissionUtil);
+        dealerManager = new DealerManager(this);
+        permissionManager = new PermissionManager(this);
+        reputationManager = new ReputationManager(this);
 
         if (getCommand("reputation") != null) {
             getCommand("reputation").setExecutor(new ReputationCommand(this));
@@ -43,7 +39,9 @@ public final class Reputation extends JavaPlugin {
 
     public void reload() {
         reloadConfig();
-        permissionUtil.loadFromConfig(getConfig());
+        dealerManager.reload();
+        permissionManager.loadConfig();
+        reputationManager.reload();
     }
 
     private void createReputationFile() {
@@ -60,6 +58,9 @@ public final class Reputation extends JavaPlugin {
         reputationConfig = YamlConfiguration.loadConfiguration(reputationFile);
     }
 
+    public FileConfiguration getReputationConfig() {
+        return reputationConfig;
+    }
 
     @Override
     public void onDisable() {
@@ -76,11 +77,15 @@ public final class Reputation extends JavaPlugin {
     }
 
 
-    public ReputationCore getReputationCore() {
-        return reputationCore;
+    public ReputationManager getReputationCore() {
+        return reputationManager;
     }
 
-    public PermissionUtil getPermissionUtil() {
-        return permissionUtil;
+    public PermissionManager getPermissionUtil() {
+        return permissionManager;
+    }
+
+    public DealerManager getDealerManager() {
+        return dealerManager;
     }
 }
