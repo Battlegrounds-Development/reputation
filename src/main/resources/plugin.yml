@@ -2,7 +2,7 @@ name: ReputationBGS
 version: '${project.version}'
 main: me.remag501.reputation.Reputation
 api-version: '1.21'
-depend: [PlaceholderAPI]
+depend: [BGSCore, PlaceholderAPI]
 
 commands:
   reputation:
