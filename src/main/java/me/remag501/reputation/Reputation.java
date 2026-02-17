@@ -1,5 +1,8 @@
 package me.remag501.reputation;
 
+import me.remag501.bgscore.api.BGSApi;
+import me.remag501.bgscore.api.command.CommandService;
+import me.remag501.bgscore.api.event.EventService;
 import me.remag501.reputation.command.ReputationCommand;
 import me.remag501.reputation.listener.PlayerListener;
 import me.remag501.reputation.manager.ReputationManager;
@@ -26,6 +29,10 @@ public final class Reputation extends JavaPlugin {
         // Load config.yml and reputation.yml
         saveDefaultConfig();
         createReputationFile();
+
+        // Load in api services
+        EventService eventService = BGSApi.events();
+        CommandService commandService = BGSApi.commands();
 
         // Load in managers
         dealerManager = new DealerManager(getConfig());
