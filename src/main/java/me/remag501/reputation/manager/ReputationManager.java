@@ -1,38 +1,37 @@
 package me.remag501.reputation.manager;
 
 import me.remag501.reputation.Reputation;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.*;
 
 public class ReputationManager {
 
+    private final PermissionManager permissionManager;
     private final Map<UUID, Map<String, Integer>> playersReputation = new HashMap<>();
+    private final FileConfiguration reputationData;
+
     private List<String> npcList;
-    private FileConfiguration reputationData;
-    private PermissionManager permissionManager;
     private double buyRate;
     private double sellRate;
     private String msgGain;
     private String msgLoss;
     private Sound soundGain;
     private Sound soundLoss;
-    private Reputation plugin;
 
-    public ReputationManager(Reputation plugin) {
-        this.plugin = plugin;
-        setManagers(plugin);
-        loadConfig();
+
+    public ReputationManager(PermissionManager permissionManager, FileConfiguration reputationData, FileConfiguration mainConfig) {
+        this.permissionManager = permissionManager;
+        this.reputationData = reputationData;
+        loadConfig(mainConfig);
         loadReputation();
     }
 
-    public void reload() {
-        setManagers(plugin);
-        loadConfig();
+    public void reload(FileConfiguration mainConfig) {
+        loadConfig(mainConfig);
         loadReputation();
     }
 
@@ -42,15 +41,8 @@ public class ReputationManager {
         return new HashMap<>(playersReputation.getOrDefault(uuid, new HashMap<>()));
     }
 
-    private void setManagers(Reputation plugin) {
-        this.reputationData = plugin.getReputationConfig();
-        this.npcList = plugin.getDealerManager().getDealers();
-        this.permissionManager = plugin.getPermissionManager();
-    }
-
-    private void loadConfig() {
+    private void loadConfig(FileConfiguration mainConfig) {
         // Read from main config (not reputation.yml)
-        FileConfiguration mainConfig = plugin.getConfig();
         this.buyRate = mainConfig.getDouble("conversion.buy-rate", 0.5);
         this.sellRate = mainConfig.getDouble("conversion.sell-rate", 0.2);
 
@@ -58,8 +50,20 @@ public class ReputationManager {
         this.msgGain = mainConfig.getString("messages.reputation-gain", "&aYou gained &e%amount% rep with &b%dealer%!");
         this.msgLoss = mainConfig.getString("messages.reputation-loss", "&cYou lost &e%amount% rep with &b%dealer%!");
 
-        this.soundGain = Sound.valueOf(mainConfig.getString("sounds.gain", "ENTITY_PLAYER_LEVELUP"));
-        this.soundLoss = Sound.valueOf(mainConfig.getString("sounds.loss", "ENTITY_VILLAGER_NO"));
+        this.soundGain = getSoundFromConfig("sounds.gain", "entity.player.levelup", mainConfig);
+        this.soundLoss = getSoundFromConfig("sounds.loss", "entity.villager.no", mainConfig);
+    }
+
+    private Sound getSoundFromConfig(String path, String defaultValue, FileConfiguration mainConfig) {
+        String name = mainConfig.getString(path, defaultValue).toLowerCase().replace("_", ".");
+        NamespacedKey key = NamespacedKey.fromString(name);
+
+        Sound sound = Registry.SOUNDS.get(key);
+        if (sound == null) {
+            // Fallback or log warning
+            return Sound.ENTITY_PLAYER_LEVELUP;
+        }
+        return sound;
     }
 
     private void sendFeedback(Player player, int amount, String dealer, boolean isGain) {
