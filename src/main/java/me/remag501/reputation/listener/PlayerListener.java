@@ -1,35 +1,29 @@
 package me.remag501.reputation.listener;
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.remag501.reputation.Reputation;
+import me.remag501.bgscore.api.event.EventService;
 import me.remag501.reputation.manager.PermissionManager;
 import me.remag501.reputation.manager.ReputationManager;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.entity.Player;
 
-public class PlayerListener implements Listener {
+public class PlayerListener {
 
-    private final PermissionManager permissionManager;
-    private final ReputationManager reputationManager;
+    public PlayerListener(EventService eventService, PermissionManager permissionManager, ReputationManager reputationManager) {
 
-    public PlayerListener(PermissionManager permissionManager, ReputationManager reputationManager) {
-        this.permissionManager = permissionManager;
-        this.reputationManager = reputationManager;
+        // Handle Join: apply permissions
+        eventService.subscribe(PlayerJoinEvent.class)
+                .namespace("reputation")
+                .handler(event -> {
+                    Player player = event.getPlayer();
+                    permissionManager.applyAllPermissions(player, reputationManager.getReputationMap(player));
+                });
+
+        // Handle Quit: cleanup attachments
+        eventService.subscribe(PlayerQuitEvent.class)
+                .namespace("reputation")
+                .handler(event -> {
+                    permissionManager.removeAttachment(event.getPlayer());
+                });
     }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        permissionManager.applyAllPermissions(player, reputationManager.getReputationMap(player));
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        permissionManager.removeAttachment(event.getPlayer());
-    }
-
 }
