@@ -1,6 +1,5 @@
 package me.remag501.reputation.manager;
 
-import me.remag501.reputation.Reputation;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;

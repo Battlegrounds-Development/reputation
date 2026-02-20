@@ -1,6 +1,6 @@
 package me.remag501.reputation.command;
 
-import me.remag501.reputation.Reputation;
+import me.remag501.reputation.ReputationPlugin;
 import me.remag501.reputation.manager.ReputationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -11,9 +11,9 @@ import org.bukkit.entity.Player;
 public class ReputationCommand implements CommandExecutor {
 
     private final ReputationManager reputationManager;
-    private final Reputation plugin;
+    private final ReputationPlugin plugin;
 
-    public ReputationCommand(Reputation plugin, ReputationManager reputationManager) {
+    public ReputationCommand(ReputationPlugin plugin, ReputationManager reputationManager) {
         this.plugin = plugin;
         this.reputationManager = reputationManager;
     }

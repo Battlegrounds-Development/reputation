@@ -15,9 +15,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
-public final class Reputation extends JavaPlugin {
+public final class ReputationPlugin extends JavaPlugin {
 
     private ReputationManager reputationManager;
     private File reputationFile;
